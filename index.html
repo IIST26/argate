@@ -2,95 +2,104 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Tracked Logic Panel</title>
+    <title>IIST AR - Simple Logic Fix</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
+    <style>
+        body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        
+        #ui { 
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
+            z-index: 1000; text-align: center; font-family: sans-serif; 
+            background: rgba(10, 10, 10, 0.85); padding: 20px; 
+            border-radius: 20px; color: white; display: none; 
+            border: 2px solid #00d2ff; width: 80%; max-width: 350px;
+        }
+
+        .btn-container { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+
+        .btn { 
+            flex: 1; padding: 15px 10px; cursor: pointer; border: none; 
+            border-radius: 12px; font-weight: bold; font-size: 14px; 
+            transition: 0.3s; text-transform: uppercase;
+        }
+
+        .off { background: #444; color: #bbb; border-bottom: 4px solid #222; }
+        .on { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; border-bottom: 4px solid #008800; }
+        
+        #status-label { font-size: 14px; color: #00d2ff; letter-spacing: 1px; }
+    </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
+<body>
+
+    <div id="ui">
+        <div id="status-label">IIST LOGIC CONTROL</div>
+        <div class="btn-container">
+            <button id="btnA" class="btn off">A: 0</button>
+            <button id="btnB" class="btn off">B: 0</button>
+        </div>
+    </div>
 
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
-        color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false"
-        cursor="rayOrigin: mouse" raycaster="objects: .clickable">
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- Tracking Target -->
         <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
             
-            <!-- மெயின் பேனல் (Tracking Points-ல் மிதக்கும்) -->
-            <a-plane position="0 0 0.01" width="1.2" height="1.4" color="#0a0a0a" opacity="0.95">
+            <a-plane position="0 0 0" width="1.2" height="0.8" color="#111" opacity="0.9" material="transparent: true; side: double">
+                <a-text value="AND GATE TRUTH TABLE" position="0 0.35 0.01" align="center" width="2" color="#00d2ff"></a-text>
                 
-                <!-- தலைப்பு -->
-                <a-text value="AND GATE LOGIC" position="0 0.55 0.02" align="center" width="2.2" color="#00d2ff" font="exo2bold"></a-text>
-                
-                <!-- Truth Table -->
-                <a-text value="A   B | OUT\n-----------\n0   0 |  0\n0   1 |  0\n1   0 |  0\n1   1 |  1" 
-                        position="0 0.15 0.02" align="center" width="2.5" font="monoid" color="white"></a-text>
-
-                <!-- Output Display -->
-                <a-plane id="statusBox" position="0 -0.2 0.02" width="1" height="0.18" color="#333">
-                    <a-text id="statusTextAR" value="OUTPUT: 0 (OFF)" align="center" width="2.5" color="#ff4444" font="exo2bold"></a-text>
-                </a-plane>
-
-                <!-- பட்டன் A (Clickable) -->
-                <a-plane id="btnA_mesh" class="clickable" position="-0.3 -0.5 0.02" width="0.45" height="0.25" color="#444">
-                    <a-text id="btnAText" value="A: 0" align="center" width="2.5" color="white"></a-text>
-                </a-plane>
-
-                <!-- பட்டன் B (Clickable) -->
-                <a-plane id="btnB_mesh" class="clickable" position="0.3 -0.5 0.02" width="0.45" height="0.25" color="#444">
-                    <a-text id="btnBText" value="B: 0" align="center" width="2.5" color="white"></a-text>
-                </a-plane>
-
+                <a-text value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0\n1   1  |   1" 
+                        position="0 0 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
             </a-plane>
-            
+
+            <a-text id="statusText" value="OUTPUT: OFF" position="0 -0.5 0" scale="0.6 0.6 0.6" color="#ff4444" align="center" font="exo2bold"></a-text>
+
         </a-entity>
     </a-scene>
 
     <script>
         let inA = 0, inB = 0;
+        const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
+        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        const statusText = document.getElementById('statusText');
 
-        const btnA = document.querySelector('#btnA_mesh');
-        const btnB = document.querySelector('#btnB_mesh');
-        const btnAText = document.querySelector('#btnAText');
-        const btnBText = document.querySelector('#btnBText');
-        const statusTextAR = document.querySelector('#statusTextAR');
-        const statusBox = document.querySelector('#statusBox');
+        // படம் கண்டறியப்பட்டால்/மறைந்தால்
+        andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
+        andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
 
         function updateLogic() {
             // AND Gate Logic
             let out = (inA === 1 && inB === 1) ? 1 : 0;
-            
+
             if (out === 1) {
-                statusTextAR.setAttribute('value', 'OUTPUT: 1 (ON)');
-                statusTextAR.setAttribute('color', '#00ff00');
-                statusBox.setAttribute('color', '#004400'); // ON ஆகும் போது பச்சை நிறம்
+                statusText.setAttribute('value', 'OUTPUT: 1 (ON)');
+                statusText.setAttribute('color', '#00ff00');
             } else {
-                statusTextAR.setAttribute('value', 'OUTPUT: 0 (OFF)');
-                statusTextAR.setAttribute('color', '#ff4444');
-                statusBox.setAttribute('color', '#440000'); // OFF ஆகும் போது சிவப்பு நிறம்
+                statusText.setAttribute('value', 'OUTPUT: 0 (OFF)');
+                statusText.setAttribute('color', '#ff4444');
             }
         }
 
-        // 3D பட்டன் A-வை கிளிக் செய்யும் போது
-        btnA.addEventListener('click', () => {
-            inA = (inA === 0) ? 1 : 0;
-            btnAText.setAttribute('value', `A: ${inA}`);
-            btnA.setAttribute('color', inA ? '#00ff00' : '#444');
-            btnAText.setAttribute('color', inA ? '#000' : '#fff');
+        btnA.onclick = () => {
+            inA = inA === 0 ? 1 : 0;
+            btnA.innerText = `A: ${inA}`;
+            btnA.className = inA ? 'btn on' : 'btn off';
             updateLogic();
-        });
+        };
 
-        // 3D பட்டன் B-வை கிளிக் செய்யும் போது
-        btnB.addEventListener('click', () => {
-            inB = (inB === 0) ? 1 : 0;
-            btnBText.setAttribute('value', `B: ${inB}`);
-            btnB.setAttribute('color', inB ? '#00ff00' : '#444');
-            btnBText.setAttribute('color', inB ? '#000' : '#fff');
+        btnB.onclick = () => {
+            inB = inB === 0 ? 1 : 0;
+            btnB.innerText = `B: ${inB}`;
+            btnB.className = inB ? 'btn on' : 'btn off';
             updateLogic();
-        });
+        };
     </script>
 </body>
 </html>
