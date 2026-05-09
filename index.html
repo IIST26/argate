@@ -2,31 +2,30 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - 3D Tracked Table</title>
+    <title>IIST AR - Multi Logic Gates</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
-        /* இன்புட் பட்டன்களை மட்டும் மொபைல் திரையில் கீழே வைத்துள்ளேன், 
-           அப்போதுதான் அழுத்துவதற்கு வசதியாக இருக்கும். */
         #ui { 
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            z-index: 1000; display: none; width: 80%; max-width: 300px;
+            z-index: 1000; display: none; width: 85%; max-width: 320px;
         }
         .btn-container { display: flex; gap: 10px; }
         .btn { 
-            flex: 1; padding: 15px; cursor: pointer; border: none; 
-            border-radius: 12px; font-weight: bold; font-size: 16px; 
+            flex: 1; padding: 18px; cursor: pointer; border: none; 
+            border-radius: 15px; font-weight: bold; font-size: 16px; 
             transition: 0.3s; text-transform: uppercase;
         }
         .off { background: #333; color: #888; border-bottom: 4px solid #111; }
         .on { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; border-bottom: 4px solid #008800; }
+        #gate-name { color: #00d2ff; font-family: sans-serif; font-weight: bold; margin-bottom: 10px; text-align: center; text-shadow: 0 0 5px #000; }
     </style>
 </head>
 <body>
 
-    <!-- இன்புட் பட்டன்கள் (Mobile Screen UI) -->
     <div id="ui">
+        <div id="gate-name">GATE DETECTED</div>
         <div class="btn-container">
             <button id="btnA" class="btn off">A: 0</button>
             <button id="btnB" class="btn off">B: 0</button>
@@ -40,74 +39,94 @@
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
-            
-            <!-- AR Table Board (இப்போது இது படத்தின் மேல் மிதக்கும்) -->
-            <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
-                
-                <!-- Title -->
-                <a-text value="AND GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
-                
-                <!-- Headers -->
-                <a-text value="A    B  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
-                <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
+        <!-- Template Entity for all Gates -->
+        <a-entity id="logic-lab-container"></a-entity>
 
-                <!-- Static Rows -->
-                <a-text id="row00" value="0    0  |   0" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-text id="row01" value="0    1  |   0" position="0 -0.05 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-text id="row10" value="1    0  |   0" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
-                
-                <!-- Dynamic Highlighting Row -->
-                <a-plane id="highlightPlane" position="0 -0.35 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
-                    <a-text id="row11" value="1    1  |   0" position="0 0 0.01" align="center" width="2.5" color="#ff4444"></a-text>
-                </a-plane>
-
-                <!-- IIST Logo or Name -->
-                <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
-                
-            </a-box>
-
-        </a-entity>
     </a-scene>
 
     <script>
-        let inA = 0, inB = 0;
-        const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
-        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
-        
-        // AR Elements
-        const row11 = document.getElementById('row11');
-        const highlightPlane = document.getElementById('highlightPlane');
+        let inA = 0, inB = 0, currentGate = "";
+        const ui = document.querySelector('#ui');
+        const gateLabel = document.querySelector('#gate-name');
+        const container = document.querySelector('#logic-lab-container');
 
-        andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
-        andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
+        // Logic Definitions
+        const gates = [
+            { name: "AND GATE", index: 0, table: ["0 0 | 0", "0 1 | 0", "1 0 | 0", "1 1 | 1"], check: (a, b) => a && b },
+            { name: "OR GATE", index: 1, table: ["0 0 | 0", "0 1 | 1", "1 0 | 1", "1 1 | 1"], check: (a, b) => a || b },
+            { name: "NAND GATE", index: 2, table: ["0 0 | 1", "0 1 | 1", "1 0 | 1", "1 1 | 0"], check: (a, b) => !(a && b) },
+            { name: "NOT GATE", index: 3, table: ["0 | 1", "1 | 0", "-", "-"], check: (a, b) => !a }
+        ];
+
+        // Create AR entities for each target
+        gates.forEach(gate => {
+            const target = document.createElement('a-entity');
+            target.setAttribute('mindar-image-target', `targetIndex: ${gate.index}`);
+            
+            target.innerHTML = `
+                <a-box position="0 0 0" width="1.1" height="1.4" depth="0.02" color="#111" opacity="0.9">
+                    <a-text value="${gate.name}" position="0 0.55 0.02" align="center" width="2.5" color="#00d2ff"></a-text>
+                    <a-text value="TRUTH TABLE" position="0 0.4 0.02" align="center" width="1.8" color="#aaa"></a-text>
+                    
+                    <a-text value="${gate.table[0]}" position="0 0.2 0.02" align="center" width="2.5" color="white"></a-text>
+                    <a-text value="${gate.table[1]}" position="0 0.05 0.02" align="center" width="2.5" color="white"></a-text>
+                    <a-text value="${gate.table[2]}" position="0 -0.1 0.02" align="center" width="2.5" color="white"></a-text>
+                    
+                    <a-plane id="highlight-${gate.index}" position="0 -0.3 0.01" width="0.9" height="0.15" color="#222">
+                        <a-text id="resultText-${gate.index}" value="STATUS: -" position="0 0 0.01" align="center" width="2.5" color="white"></a-text>
+                    </a-plane>
+                    
+                    <a-text value="IIST STEM LAB" position="0 -0.6 0.02" align="center" width="1.5" color="#444"></a-text>
+                </a-box>
+            `;
+
+            target.addEventListener("targetFound", () => {
+                currentGate = gate;
+                gateLabel.innerText = gate.name;
+                ui.style.display = "block";
+                
+                // NOT Gate என்றால் ஒரு பட்டனை மட்டும் காட்டு
+                document.getElementById('btnB').style.visibility = (gate.index === 3) ? "hidden" : "visible";
+                updateLogic();
+            });
+
+            target.addEventListener("targetLost", () => {
+                ui.style.display = "none";
+            });
+
+            container.appendChild(target);
+        });
 
         function updateLogic() {
-            let out = (inA === 1 && inB === 1) ? 1 : 0;
-            
-            // 1 1 | ? என்ற வரியை மட்டும் படத்தில் மாற்றுகிறோம்
+            if (!currentGate) return;
+
+            let out = currentGate.check(inA, inB) ? 1 : 0;
+            const resText = document.getElementById(`resultText-${currentGate.index}`);
+            const hPlane = document.getElementById(`highlight-${currentGate.index}`);
+
+            let displayText = (currentGate.index === 3) ? `IN: ${inA} | OUT: ${out}` : `A:${inA} B:${inB} | OUT: ${out}`;
+            resText.setAttribute('value', displayText);
+
             if (out === 1) {
-                row11.setAttribute('value', '1    1  |   1');
-                row11.setAttribute('color', '#00ff00');
-                highlightPlane.setAttribute('color', '#004400');
+                resText.setAttribute('color', '#00ff00');
+                hPlane.setAttribute('color', '#004400');
             } else {
-                row11.setAttribute('value', '1    1  |   0');
-                row11.setAttribute('color', '#ff4444');
-                highlightPlane.setAttribute('color', '#440000');
+                resText.setAttribute('color', '#ff4444');
+                hPlane.setAttribute('color', '#440000');
             }
         }
 
-        btnA.onclick = () => {
+        document.getElementById('btnA').onclick = function() {
             inA = inA === 0 ? 1 : 0;
-            btnA.innerText = `A: ${inA}`;
-            btnA.className = inA ? 'btn on' : 'btn off';
+            this.innerText = `A: ${inA}`;
+            this.className = inA ? 'btn on' : 'btn off';
             updateLogic();
         };
 
-        btnB.onclick = () => {
+        document.getElementById('btnB').onclick = function() {
             inB = inB === 0 ? 1 : 0;
-            btnB.innerText = `B: ${inB}`;
-            btnB.className = inB ? 'btn on' : 'btn off';
+            this.innerText = `B: ${inB}`;
+            this.className = inB ? 'btn on' : 'btn off';
             updateLogic();
         };
     </script>
