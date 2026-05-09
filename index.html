@@ -2,13 +2,12 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Truth Table Update</title>
+    <title>IIST AR - Fixed Truth Table</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
         body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
-        
         #ui { 
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
             z-index: 1000; text-align: center; font-family: sans-serif; 
@@ -16,18 +15,14 @@
             border-radius: 20px; color: white; display: none; 
             border: 2px solid #00d2ff; width: 80%; max-width: 350px;
         }
-
         .btn-container { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-
         .btn { 
             flex: 1; padding: 15px 10px; cursor: pointer; border: none; 
             border-radius: 12px; font-weight: bold; font-size: 14px; 
             transition: 0.3s; text-transform: uppercase;
         }
-
         .off { background: #444; color: #bbb; border-bottom: 4px solid #222; }
         .on { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; border-bottom: 4px solid #008800; }
-        
         #status-label { font-size: 14px; color: #00d2ff; letter-spacing: 1px; }
     </style>
 </head>
@@ -43,24 +38,28 @@
 
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
-        color-space="sRGB" 
-        renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
+        color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
         <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
             
-            <a-plane position="0 0 0" width="1.2" height="1.0" color="#111" opacity="0.9" material="transparent: true; side: double">
-                <a-text value="AND GATE TRUTH TABLE" position="0 0.4 0.01" align="center" width="2" color="#00d2ff"></a-text>
+            <!-- இதுதான் அந்த கருப்பு பேனல் (Back Panel) -->
+            <a-plane position="0 0 0" width="1.2" height="1.1" color="#0a0a0a" opacity="0.95" side="double">
                 
-                <!-- நிலையான வரிகள் (Header + first 3 rows) -->
+                <a-text value="AND GATE TRUTH TABLE" position="0 0.45 0.01" align="center" width="2" color="#00d2ff" font="exo2bold"></a-text>
+                
+                <!-- நிலையான வரிகள் (Static Header and Rows) -->
                 <a-text value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0" 
-                        position="0 0.12 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
+                        position="0 0.15 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
 
-                <!-- மாறும் கடைசி வரி (Last Row) -->
+                <!-- மாறும் கடைசி வரி (Last Row Only) -->
                 <a-text id="lastRow" value="1   1  |   0" position="0 -0.28 0.01" align="center" width="2.5" font="monoid" color="#ff4444"></a-text>
+
+                <!-- பார்டர் லைன் (கடைசி வரிக்கு மேலே ஒரு கோடு) -->
+                <a-plane position="0 -0.15 0.01" width="0.8" height="0.01" color="#333"></a-plane>
+                
             </a-plane>
 
         </a-entity>
@@ -76,15 +75,11 @@
         andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
 
         function updateLogic() {
-            // AND Gate Logic
             let out = (inA === 1 && inB === 1) ? 1 : 0;
-
             if (out === 1) {
-                // கடைசி வரி பச்சை நிறமாக மாறும்
                 lastRow.setAttribute('value', '1   1  |   1');
                 lastRow.setAttribute('color', '#00ff00');
             } else {
-                // கடைசி வரி சிவப்பு நிறமாக மாறும்
                 lastRow.setAttribute('value', '1   1  |   0');
                 lastRow.setAttribute('color', '#ff4444');
             }
