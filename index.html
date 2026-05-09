@@ -2,126 +2,114 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Full Camera Fix</title>
+    <title>IIST AR LAB - Fix</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.2/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
-        /* கேமரா முழுமையாகத் தெரிய இது அவசியம் */
-        body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
-        
-        /* UI Control Panel - கச்சிதமான டிசைன் */
-        #ui { 
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            z-index: 1000; text-align: center; font-family: sans-serif; 
-            background: rgba(10, 10, 10, 0.85); padding: 20px; 
-            border-radius: 20px; color: white; display: none; 
-            border: 2px solid #00d2ff; width: 80%; max-width: 350px;
+        body { margin: 0; overflow: hidden; background: #000; }
+        /* கேமரா எர்ரர் மெசேஜ் காட்ட */
+        #error-msg {
+            position: absolute; top: 10px; left: 10px; color: yellow; 
+            background: rgba(0,0,0,0.7); padding: 10px; z-index: 999; display: none;
         }
-
-        .btn-container { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-
-        .btn { 
-            flex: 1; padding: 15px 10px; cursor: pointer; border: none; 
-            border-radius: 12px; font-weight: bold; font-size: 14px; 
-            transition: 0.3s; text-transform: uppercase;
-        }
-
-        .off { background: #444; color: #bbb; border-bottom: 4px solid #222; }
-        .on { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; border-bottom: 4px solid #008800; }
-        
-        #status-label { font-size: 14px; color: #00d2ff; letter-spacing: 1px; }
     </style>
 </head>
 <body>
-
-    <div id="ui">
-        <div id="status-label">IIST LOGIC CONTROL</div>
-        <div class="btn-container">
-            <button id="btnA" class="btn off">A: 0</button>
-            <button id="btnB" class="btn off">B: 0</button>
-        </div>
-    </div>
+    <div id="error-msg">கேமரா லோடு ஆகவில்லை. தயவுசெய்து HTTPS லிங்க் பயன்படுத்தவும்!</div>
 
     <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
-        color-space="sRGB" 
+        mindar-image="imageTargetSrc: ./and-gate.mind; autoStart: true; uiLoading: yes; uiScanning: yes;" 
+        embedded color-space="sRGB" 
         renderer="colorManagement: true, physicallyCorrectLights" 
         vr-mode-ui="enabled: false" 
         device-orientation-permission-ui="enabled: false">
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
-            
-            <a-plane position="0 0 0" width="1.2" height="0.8" color="#111" opacity="0.9" material="transparent: true; side: double">
-                <a-text value="AND GATE TRUTH TABLE" position="0 0.35 0.01" align="center" width="2" color="#00d2ff"></a-text>
+        <a-camera position="0 0 0" look-controls="enabled: false">
+            <a-entity cursor="fuse: false; rayOrigin: mouse;" 
+                      raycaster="objects: .clickable"></a-entity>
+        </a-camera>
+
+        <a-entity id="and-target" mindar-image-target="targetIndex: 0">
+            <a-entity id="gate-ui" visible="false">
                 
-                <a-text value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0\n1   1  |   1" 
-                        position="0 0 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
-            </a-plane>
+                <a-plane width="1.4" height="1.1" color="#f0f0f0" material="opacity: 0.95"></a-plane>
+                <a-text value="IIST: AND GATE KIT" color="#1a237e" align="center" position="0 0.48 0.02" width="2.5"></a-text>
 
-            <a-sphere id="pulseA" position="-0.4 0.15 0.02" radius="0.02" color="#00ff00" visible="false"
-                      animation="property: position; from: -0.4 0.15 0.02; to: -0.1 0.15 0.02; dur: 800; loop: true; easing: linear; enabled: false">
-            </a-sphere>
+                <a-entity position="0 0.1 0.03" scale="1.3 1.3 1.3">
+                    <a-plane width="0.12" height="0.2" color="#3f51b5" position="-0.06 0 0"></a-plane>
+                    <a-entity geometry="primitive: circle; radius: 0.1; thetaLength: 180" 
+                              material="color: #3f51b5" rotation="0 0 -90"></a-entity>
+                    <a-text value="AND" color="white" align="center" position="-0.02 0 0.01" width="1"></a-text>
+                </a-entity>
 
-            <a-sphere id="pulseB" position="-0.4 -0.15 0.02" radius="0.02" color="#00ff00" visible="false"
-                      animation="property: position; from: -0.4 -0.15 0.02; to: -0.1 -0.15 0.02; dur: 800; loop: true; easing: linear; enabled: false">
-            </a-sphere>
+                <a-entity id="btn-a" class="clickable" position="-0.45 0.2 0.04">
+                    <a-box id="box-a" width="0.14" height="0.14" depth="0.04" color="#ff5252">
+                        <a-text id="val-a" value="OFF" align="center" width="2.5" position="0 0 0.03"></a-text>
+                    </a-box>
+                    <a-text value="SW A" position="0 -0.15 0" width="1.5" align="center" color="#333"></a-text>
+                </a-entity>
 
-            <a-sphere id="pulseY" position="0.1 0 0.02" radius="0.02" color="#ffff00" visible="false"
-                      animation="property: position; from: 0.1 0 0.02; to: 0.4 0 0.02; dur: 800; loop: true; easing: linear; enabled: false">
-            </a-sphere>
+                <a-entity id="btn-b" class="clickable" position="-0.45 -0.15 0.04">
+                    <a-box id="box-b" width="0.14" height="0.14" depth="0.04" color="#ff5252">
+                        <a-text id="val-b" value="OFF" align="center" width="2.5" position="0 0 0.03"></a-text>
+                    </a-box>
+                    <a-text value="SW B" position="0 -0.15 0" width="1.5" align="center" color="#333"></a-text>
+                </a-entity>
 
-            <a-text id="statusText" value="OUTPUT: OFF" position="0 -0.5 0" scale="0.6 0.6 0.6" color="#ff4444" align="center" font="exo2bold"></a-text>
+                <a-sphere id="led-out" position="0.45 0.05 0.05" radius="0.1" color="#424242"></a-sphere>
+                <a-text value="OUTPUT" position="0.45 -0.1 0" align="center" width="1.5" color="#333"></a-text>
 
+                <a-entity position="0 -0.38 0.03">
+                    <a-plane width="1.1" height="0.3" color="#e0e0e0"></a-plane>
+                    <a-text value="A    B  |  LED" position="0 0.08 0.01" align="center" width="2" color="#1a237e"></a-text>
+                    <a-text id="table-txt" value="0    0  |  OFF\n0    1  |  OFF\n1    0  |  OFF\n1    1  |  ON" 
+                            position="0 -0.06 0.01" align="center" width="2" color="#333" line-height="50"></a-text>
+                    <a-plane id="selector" width="1" height="0.055" color="#3f51b5" material="opacity: 0.3" position="0 0.04 0.02"></a-plane>
+                </a-entity>
+
+            </a-entity>
         </a-entity>
     </a-scene>
 
     <script>
-        let inA = 0, inB = 0;
-        const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
-        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
-        const pulseA = document.getElementById('pulseA'), pulseB = document.getElementById('pulseB'), pulseY = document.getElementById('pulseY');
-        const statusText = document.getElementById('statusText');
+        const target = document.querySelector('#and-target');
+        const ui = document.querySelector('#gate-ui');
+        const boxA = document.querySelector('#box-a');
+        const boxB = document.querySelector('#box-b');
+        const valA = document.querySelector('#val-a');
+        const valB = document.querySelector('#val-b');
+        const led = document.querySelector('#led-out');
+        const selector = document.querySelector('#selector');
+        
+        let a = 0, b = 0;
 
-        // Target found/lost events
-        andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
-        andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
+        // படம் கண்டறியப்பட்டால்
+        target.addEventListener("targetFound", () => { ui.setAttribute("visible", "true"); });
+        target.addEventListener("targetLost", () => { ui.setAttribute("visible", "false"); });
 
-        function updateLogic() {
-            let out = (inA === 1 && inB === 1) ? 1 : 0;
+        function update() {
+            valA.setAttribute("value", a ? "ON" : "OFF");
+            boxA.setAttribute("color", a ? "#4caf50" : "#ff5252");
+            valB.setAttribute("value", b ? "ON" : "OFF");
+            boxB.setAttribute("color", b ? "#4caf50" : "#ff5252");
 
-            if (out === 1) {
-                statusText.setAttribute('value', 'OUTPUT: 1 (ON)');
-                statusText.setAttribute('color', '#00ff00');
-                pulseY.setAttribute('visible', 'true');
-                pulseY.setAttribute('animation', 'enabled: true');
-            } else {
-                statusText.setAttribute('value', 'OUTPUT: 0 (OFF)');
-                statusText.setAttribute('color', '#ff4444');
-                pulseY.setAttribute('visible', 'false');
-                pulseY.setAttribute('animation', 'enabled: false');
-            }
+            const res = (a === 1 && b === 1) ? 1 : 0;
+            led.setAttribute("color", res ? "#ffeb3b" : "#424242");
+            
+            let yPositions = [0.04, 0.005, -0.03, -0.065];
+            selector.setAttribute("position", `0 ${yPositions[(a*2)+b]} 0.02`);
         }
 
-        btnA.onclick = () => {
-            inA = inA === 0 ? 1 : 0;
-            btnA.innerText = `A: ${inA}`;
-            btnA.className = inA ? 'btn on' : 'btn off';
-            pulseA.setAttribute('visible', inA === 1);
-            pulseA.setAttribute('animation', 'enabled', inA === 1);
-            updateLogic();
-        };
+        document.querySelector('#btn-a').addEventListener('mousedown', () => { a = a?0:1; update(); });
+        document.querySelector('#btn-b').addEventListener('mousedown', () => { b = b?0:1; update(); });
 
-        btnB.onclick = () => {
-            inB = inB === 0 ? 1 : 0;
-            btnB.innerText = `B: ${inB}`;
-            btnB.className = inB ? 'btn on' : 'btn off';
-            pulseB.setAttribute('visible', inB === 1);
-            pulseB.setAttribute('animation', 'enabled', inB === 1);
-            updateLogic();
-        };
+        // கேமரா எர்ரர் செக்
+        window.addEventListener('load', () => {
+            if (location.protocol !== 'https:') {
+                document.getElementById('error-msg').style.display = 'block';
+            }
+        });
     </script>
 </body>
 </html>
