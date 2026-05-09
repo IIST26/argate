@@ -2,28 +2,39 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Multi Logic Gates</title>
+    <title>IIST AR - Simple Logic Fix</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
+    
     <style>
-        body { margin: 0; overflow: hidden; }
+        body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
+        
         #ui { 
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            z-index: 1000; display: none; width: 80%; max-width: 300px;
+            z-index: 1000; text-align: center; font-family: sans-serif; 
+            background: rgba(10, 10, 10, 0.85); padding: 20px; 
+            border-radius: 20px; color: white; display: none; 
+            border: 2px solid #00d2ff; width: 80%; max-width: 350px;
         }
-        .btn-container { display: flex; gap: 10px; }
+
+        .btn-container { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
+
         .btn { 
-            flex: 1; padding: 15px; cursor: pointer; border: none; 
-            border-radius: 12px; font-weight: bold; font-size: 16px; 
+            flex: 1; padding: 15px 10px; cursor: pointer; border: none; 
+            border-radius: 12px; font-weight: bold; font-size: 14px; 
             transition: 0.3s; text-transform: uppercase;
         }
-        .off { background: #333; color: #888; border-bottom: 4px solid #111; }
+
+        .off { background: #444; color: #bbb; border-bottom: 4px solid #222; }
         .on { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; border-bottom: 4px solid #008800; }
+        
+        #status-label { font-size: 14px; color: #00d2ff; letter-spacing: 1px; }
     </style>
 </head>
 <body>
 
     <div id="ui">
+        <div id="status-label">IIST LOGIC CONTROL</div>
         <div class="btn-container">
             <button id="btnA" class="btn off">A: 0</button>
             <button id="btnB" class="btn off">B: 0</button>
@@ -32,99 +43,63 @@
 
     <a-scene 
         mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
-        color-space="sRGB" renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" device-orientation-permission-ui="enabled: false">
+        color-space="sRGB" 
+        renderer="colorManagement: true, physicallyCorrectLights" 
+        vr-mode-ui="enabled: false" 
+        device-orientation-permission-ui="enabled: false">
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- AND GATE (Target 0) -->
         <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
-            <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
-                <a-text value="AND GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
-                <a-text value="A    B  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
-                <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
-                <a-text value="0    0  |   0" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-text value="0    1  |   0" position="0 -0.05 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-text value="1    0  |   0" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-plane id="hlAND" position="0 -0.35 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
-                    <a-text id="rowAND" value="1    1  |   0" position="0 0 0.01" align="center" width="2.5" color="#ff4444"></a-text>
-                </a-plane>
-                <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
-            </a-box>
-        </a-entity>
+            
+            <a-plane position="0 0 0" width="1.2" height="0.8" color="#111" opacity="0.9" material="transparent: true; side: double">
+                <a-text value="AND GATE TRUTH TABLE" position="0 0.35 0.01" align="center" width="2" color="#00d2ff"></a-text>
+                
+                <a-text value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0\n1   1  |   1" 
+                        position="0 0 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
+            </a-plane>
 
-        <!-- OR GATE (Target 1) -->
-        <a-entity mindar-image-target="targetIndex: 1" id="orTarget">
-            <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
-                <a-text value="OR GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
-                <a-text value="A    B  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
-                <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
-                <a-text value="0    0  |   0" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-text value="0    1  |   1" position="0 -0.05 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-text value="1    0  |   1" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-plane id="hlOR" position="0 -0.35 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
-                    <a-text id="rowOR" value="1    1  |   1" position="0 0 0.01" align="center" width="2.5" color="#00ff00"></a-text>
-                </a-plane>
-                <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
-            </a-box>
-        </a-entity>
+            <a-text id="statusText" value="OUTPUT: OFF" position="0 -0.5 0" scale="0.6 0.6 0.6" color="#ff4444" align="center" font="exo2bold"></a-text>
 
-        <!-- NOT GATE (Target 2) -->
-        <a-entity mindar-image-target="targetIndex: 2" id="notTarget">
-            <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
-                <a-text value="NOT GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
-                <a-text value="IN (A)  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
-                <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
-                <a-text value="-" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-plane id="hlNOT" position="0 -0.05 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
-                    <a-text id="rowNOT" value="0  |  1" position="0 0 0.01" align="center" width="2.5" color="#00ff00"></a-text>
-                </a-plane>
-                <a-text value="-" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
-                <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
-            </a-box>
         </a-entity>
-
     </a-scene>
 
     <script>
-        let inA = 0, inB = 0, active = "";
-        const ui = document.querySelector('#ui'), btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
-        
-        const setup = (id, key) => {
-            document.getElementById(id).addEventListener("targetFound", () => { 
-                active = key; ui.style.display = "block"; 
-                btnB.style.visibility = (key === 'not') ? "hidden" : "visible";
-                updateLogic(); 
-            });
-            document.getElementById(id).addEventListener("targetLost", () => { ui.style.display = "none"; });
-        };
+        let inA = 0, inB = 0;
+        const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
+        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        const statusText = document.getElementById('statusText');
 
-        setup("andTarget", "and"); setup("orTarget", "or"); setup("notTarget", "not");
+        // படம் கண்டறியப்பட்டால்/மறைந்தால்
+        andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
+        andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
 
         function updateLogic() {
-            if (active === "and") {
-                let res = (inA && inB) ? 1 : 0;
-                let el = document.getElementById('rowAND'), hl = document.getElementById('hlAND');
-                el.setAttribute('value', `1    1  |   ${res}`);
-                el.setAttribute('color', res ? '#00ff00' : '#ff4444');
-                hl.setAttribute('color', res ? '#004400' : '#440000');
-            } else if (active === "or") {
-                let res = (inA || inB) ? 1 : 0;
-                let el = document.getElementById('rowOR'), hl = document.getElementById('hlOR');
-                el.setAttribute('value', `1    1  |   ${res}`);
-                el.setAttribute('color', res ? '#00ff00' : '#ff4444');
-                hl.setAttribute('color', res ? '#004400' : '#440000');
-            } else if (active === "not") {
-                let res = inA ? 0 : 1;
-                let el = document.getElementById('rowNOT'), hl = document.getElementById('hlNOT');
-                el.setAttribute('value', `${inA}  |  ${res}`);
-                el.setAttribute('color', res ? '#00ff00' : '#ff4444');
-                hl.setAttribute('color', res ? '#004400' : '#440000');
+            // AND Gate Logic
+            let out = (inA === 1 && inB === 1) ? 1 : 0;
+
+            if (out === 1) {
+                statusText.setAttribute('value', 'OUTPUT: 1 (ON)');
+                statusText.setAttribute('color', '#00ff00');
+            } else {
+                statusText.setAttribute('value', 'OUTPUT: 0 (OFF)');
+                statusText.setAttribute('color', '#ff4444');
             }
         }
 
-        btnA.onclick = () => { inA = inA ? 0 : 1; btnA.innerText = `A: ${inA}`; btnA.className = inA ? 'btn on' : 'btn off'; updateLogic(); };
-        btnB.onclick = () => { inB = inB ? 0 : 1; btnB.innerText = `B: ${inB}`; btnB.className = inB ? 'btn on' : 'btn off'; updateLogic(); };
+        btnA.onclick = () => {
+            inA = inA === 0 ? 1 : 0;
+            btnA.innerText = `A: ${inA}`;
+            btnA.className = inA ? 'btn on' : 'btn off';
+            updateLogic();
+        };
+
+        btnB.onclick = () => {
+            inB = inB === 0 ? 1 : 0;
+            btnB.innerText = `B: ${inB}`;
+            btnB.className = inB ? 'btn on' : 'btn off';
+            updateLogic();
+        };
     </script>
 </body>
 </html>
