@@ -2,13 +2,15 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Simple Logic Fix</title>
+    <title>IIST AR - Full Camera Fix</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
     <style>
+        /* கேமரா முழுமையாகத் தெரிய இது அவசியம் */
         body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
         
+        /* UI Control Panel - கச்சிதமான டிசைன் */
         #ui { 
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
             z-index: 1000; text-align: center; font-family: sans-serif; 
@@ -59,6 +61,18 @@
                         position="0 0 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
             </a-plane>
 
+            <a-sphere id="pulseA" position="-0.4 0.15 0.02" radius="0.02" color="#00ff00" visible="false"
+                      animation="property: position; from: -0.4 0.15 0.02; to: -0.1 0.15 0.02; dur: 800; loop: true; easing: linear; enabled: false">
+            </a-sphere>
+
+            <a-sphere id="pulseB" position="-0.4 -0.15 0.02" radius="0.02" color="#00ff00" visible="false"
+                      animation="property: position; from: -0.4 -0.15 0.02; to: -0.1 -0.15 0.02; dur: 800; loop: true; easing: linear; enabled: false">
+            </a-sphere>
+
+            <a-sphere id="pulseY" position="0.1 0 0.02" radius="0.02" color="#ffff00" visible="false"
+                      animation="property: position; from: 0.1 0 0.02; to: 0.4 0 0.02; dur: 800; loop: true; easing: linear; enabled: false">
+            </a-sphere>
+
             <a-text id="statusText" value="OUTPUT: OFF" position="0 -0.5 0" scale="0.6 0.6 0.6" color="#ff4444" align="center" font="exo2bold"></a-text>
 
         </a-entity>
@@ -68,22 +82,26 @@
         let inA = 0, inB = 0;
         const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
         const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        const pulseA = document.getElementById('pulseA'), pulseB = document.getElementById('pulseB'), pulseY = document.getElementById('pulseY');
         const statusText = document.getElementById('statusText');
 
-        // படம் கண்டறியப்பட்டால்/மறைந்தால்
+        // Target found/lost events
         andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
         andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
 
         function updateLogic() {
-            // AND Gate Logic
             let out = (inA === 1 && inB === 1) ? 1 : 0;
 
             if (out === 1) {
                 statusText.setAttribute('value', 'OUTPUT: 1 (ON)');
                 statusText.setAttribute('color', '#00ff00');
+                pulseY.setAttribute('visible', 'true');
+                pulseY.setAttribute('animation', 'enabled: true');
             } else {
                 statusText.setAttribute('value', 'OUTPUT: 0 (OFF)');
                 statusText.setAttribute('color', '#ff4444');
+                pulseY.setAttribute('visible', 'false');
+                pulseY.setAttribute('animation', 'enabled: false');
             }
         }
 
@@ -91,6 +109,8 @@
             inA = inA === 0 ? 1 : 0;
             btnA.innerText = `A: ${inA}`;
             btnA.className = inA ? 'btn on' : 'btn off';
+            pulseA.setAttribute('visible', inA === 1);
+            pulseA.setAttribute('animation', 'enabled', inA === 1);
             updateLogic();
         };
 
@@ -98,6 +118,8 @@
             inB = inB === 0 ? 1 : 0;
             btnB.innerText = `B: ${inB}`;
             btnB.className = inB ? 'btn on' : 'btn off';
+            pulseB.setAttribute('visible', inB === 1);
+            pulseB.setAttribute('animation', 'enabled', inB === 1);
             updateLogic();
         };
     </script>
