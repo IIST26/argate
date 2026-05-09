@@ -2,19 +2,19 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Tracked Table Fix</title>
+    <title>IIST AR - Multi Logic Gates</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
         body { margin: 0; overflow: hidden; }
         #ui { 
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            z-index: 1000; display: none; width: 85%; max-width: 320px;
+            z-index: 1000; display: none; width: 80%; max-width: 300px;
         }
         .btn-container { display: flex; gap: 10px; }
         .btn { 
-            flex: 1; padding: 18px 10px; cursor: pointer; border: none; 
-            border-radius: 15px; font-weight: bold; font-size: 16px; 
+            flex: 1; padding: 15px; cursor: pointer; border: none; 
+            border-radius: 12px; font-weight: bold; font-size: 16px; 
             transition: 0.3s; text-transform: uppercase;
         }
         .off { background: #333; color: #888; border-bottom: 4px solid #111; }
@@ -23,6 +23,7 @@
 </head>
 <body>
 
+    <!-- மொபைல் பட்டன்கள் -->
     <div id="ui">
         <div class="btn-container">
             <button id="btnA" class="btn off">A: 0</button>
@@ -37,81 +38,109 @@
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- முக்கியமானது: இங்கே targetIndex நீங்கள் உருவாக்கிய .mind கோப்பில் உள்ள எண்ணுக்குச் சரியாக இருக்க வேண்டும் -->
+        <!-- AND GATE (Index 0) -->
         <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
-            
-            <!-- அட்டவணைப் பலகை - இதைப் படத்தின் மையத்தில் (0 0 0) வைத்துள்ளேன் -->
-            <a-entity id="panelContainer" position="0 0 0" scale="1 1 1">
-                
-                <!-- கறுப்பு நிறப் பின்னணி -->
-                <a-plane width="1" height="1.2" color="#000" opacity="0.9" side="double"></a-plane>
-                
-                <!-- Border Line -->
-                <a-rect width="1" height="1.2" fill="none" stroke="#00d2ff" stroke-width="0.02"></a-rect>
-
-                <!-- தலைப்பு -->
-                <a-text value="AND GATE TABLE" position="0 0.5 0.01" align="center" width="2" color="#00d2ff" font="exo2bold"></a-text>
-                
-                <!-- அட்டவணைத் தரவுகள் -->
-                <a-text value="A    B  |  OUT" position="0 0.35 0.01" align="center" width="2.4" color="#aaa"></a-text>
-                
-                <a-text value="0    0  |   0" position="0 0.2 0.01" align="center" width="2.2" color="white"></a-text>
-                <a-text value="0    1  |   0" position="0 0.05 0.01" align="center" width="2.2" color="white"></a-text>
-                <a-text value="1    0  |   0" position="0 -0.1 0.01" align="center" width="2.2" color="white"></a-text>
-                
-                <!-- மாறும் கடைசி வரி - ஹைலைட் உடன் -->
-                <a-plane id="highlight" position="0 -0.28 0.005" width="0.85" height="0.15" color="#222">
-                    <a-text id="rowActive" value="1    1  |   0" position="0 0 0.01" align="center" width="2.5" color="#ff4444" font="exo2bold"></a-text>
+            <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
+                <a-text value="AND GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
+                <a-text value="A    B  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
+                <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
+                <a-text value="0    0  |   0" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-text value="0    1  |   0" position="0 -0.05 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-text value="1    0  |   0" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-plane id="hlAND" position="0 -0.35 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
+                    <a-text id="rowAND" value="1    1  |   0" position="0 0 0.01" align="center" width="2.5" color="#ff4444"></a-text>
                 </a-plane>
-
-                <a-text value="IIST JAFFNA" position="0 -0.5 0.01" align="center" width="1.2" color="#444"></a-text>
-            </a-entity>
-
+                <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
+            </a-box>
         </a-entity>
+
+        <!-- OR GATE (Index 1) -->
+        <a-entity mindar-image-target="targetIndex: 1" id="orTarget">
+            <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
+                <a-text value="OR GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
+                <a-text value="A    B  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
+                <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
+                <a-text value="0    0  |   0" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-text value="0    1  |   1" position="0 -0.05 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-text value="1    0  |   1" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-plane id="hlOR" position="0 -0.35 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
+                    <a-text id="rowOR" value="1    1  |   1" position="0 0 0.01" align="center" width="2.5" color="#00ff00"></a-text>
+                </a-plane>
+                <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
+            </a-box>
+        </a-entity>
+
+        <!-- NOT GATE (Index 2) -->
+        <a-entity mindar-image-target="targetIndex: 2" id="notTarget">
+            <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
+                <a-text value="NOT GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
+                <a-text value="IN (A)  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
+                <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
+                <a-text value="-" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-plane id="hlNOT" position="0 -0.05 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
+                    <a-text id="rowNOT" value="0  |  1" position="0 0 0.01" align="center" width="2.5" color="#00ff00"></a-text>
+                </a-plane>
+                <a-text value="-" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
+            </a-box>
+        </a-entity>
+
     </a-scene>
 
     <script>
-        let inA = 0, inB = 0;
-        const ui = document.querySelector('#ui');
-        const andTarget = document.querySelector('#andTarget');
-        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
-        const rowActive = document.getElementById('rowActive');
-        const highlight = document.getElementById('highlight');
+        let inA = 0, inB = 0, active = "";
+        const ui = document.querySelector('#ui'), btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        
+        // Target கண்டறியப்படும்போது நடப்பவை
+        const setupGate = (id, gateKey) => {
+            const el = document.getElementById(id);
+            el.addEventListener("targetFound", () => { 
+                active = gateKey; 
+                ui.style.display = "block"; 
+                // NOT கேட் என்றால் இன்புட் B பட்டனை மறைத்துவிடும்
+                btnB.style.display = (gateKey === 'not') ? "none" : "block";
+                updateLogic(); 
+            });
+            el.addEventListener("targetLost", () => { ui.style.display = "none"; });
+        };
 
-        // Target கண்டறியப்படும் போது மட்டும் UI தெரிய வேண்டும்
-        andTarget.addEventListener("targetFound", () => { 
-            console.log("Target Found!");
-            ui.style.display = "block"; 
-        });
-
-        andTarget.addEventListener("targetLost", () => { 
-            console.log("Target Lost!");
-            ui.style.display = "none"; 
-        });
+        setupGate("andTarget", "and");
+        setupGate("orTarget", "or");
+        setupGate("notTarget", "not");
 
         function updateLogic() {
-            let out = (inA === 1 && inB === 1) ? 1 : 0;
-            
-            if (out === 1) {
-                rowActive.setAttribute('value', '1    1  |   1');
-                rowActive.setAttribute('color', '#00ff00');
-                highlight.setAttribute('color', '#003300');
-            } else {
-                rowActive.setAttribute('value', '1    1  |   0');
-                rowActive.setAttribute('color', '#ff4444');
-                highlight.setAttribute('color', '#330000');
+            if (active === "and") {
+                let out = (inA && inB) ? 1 : 0;
+                const row = document.getElementById('rowAND'), hl = document.getElementById('hlAND');
+                row.setAttribute('value', `1    1  |   ${out}`);
+                row.setAttribute('color', out ? '#00ff00' : '#ff4444');
+                hl.setAttribute('color', out ? '#004400' : '#440000');
+            } 
+            else if (active === "or") {
+                let out = (inA || inB) ? 1 : 0;
+                const row = document.getElementById('rowOR'), hl = document.getElementById('hlOR');
+                row.setAttribute('value', `1    1  |   ${out}`);
+                row.setAttribute('color', out ? '#00ff00' : '#ff4444');
+                hl.setAttribute('color', out ? '#004400' : '#440000');
+            } 
+            else if (active === "not") {
+                let out = inA ? 0 : 1;
+                const row = document.getElementById('rowNOT'), hl = document.getElementById('hlNOT');
+                row.setAttribute('value', `${inA}  |  ${out}`);
+                row.setAttribute('color', out ? '#00ff00' : '#ff4444');
+                hl.setAttribute('color', out ? '#004400' : '#440000');
             }
         }
 
         btnA.onclick = () => {
-            inA = inA === 0 ? 1 : 0;
+            inA = inA ? 0 : 1;
             btnA.innerText = `A: ${inA}`;
             btnA.className = inA ? 'btn on' : 'btn off';
             updateLogic();
         };
 
         btnB.onclick = () => {
-            inB = inB === 0 ? 1 : 0;
+            inB = inB ? 0 : 1;
             btnB.innerText = `B: ${inB}`;
             btnB.className = inB ? 'btn on' : 'btn off';
             updateLogic();
