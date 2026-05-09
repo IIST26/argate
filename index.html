@@ -59,7 +59,7 @@
                 <a-text value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0\n1   1  |   1\n-----------" 
                         position="0 0.12 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
 
-                <!-- கடைசி Live Output வரி (Align செய்யப்பட்டது) -->
+                <!-- நீங்கள் கேட்ட அந்த Live Row (நேர்த்தியாக அலைன் செய்யப்பட்டது) -->
                 <a-text id="liveRow" value="0   0  |   0" 
                         position="0.01 -0.38 0.01" align="center" width="2.5" font="monoid" color="#ff4444"></a-text>
             </a-plane>
@@ -74,7 +74,7 @@
         const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
         const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
         const statusText = document.getElementById('statusText');
-        const liveRow = document.getElementById('liveRow');
+        const liveRow = document.getElementById('liveRow'); // புதிய Reference
 
         andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
         andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
@@ -82,17 +82,17 @@
         function updateLogic() {
             let out = (inA === 1 && inB === 1) ? 1 : 0;
 
-            // கடைசி வரியை Live-ஆக மாற்றுகிறது
+            // Live Output-ஐ அட்டவணையின் கடைசி வரியில் காட்டுகிறது
             liveRow.setAttribute('value', `${inA}   ${inB}  |   ${out}`);
 
             if (out === 1) {
                 statusText.setAttribute('value', 'OUTPUT: 1 (ON)');
                 statusText.setAttribute('color', '#00ff00');
-                liveRow.setAttribute('color', '#00ff00'); // ON ஆகும் போது பச்சை நிறம்
+                liveRow.setAttribute('color', '#00ff00'); // பச்சை நிறம்
             } else {
                 statusText.setAttribute('value', 'OUTPUT: 0 (OFF)');
                 statusText.setAttribute('color', '#ff4444');
-                liveRow.setAttribute('color', '#ff4444'); // OFF ஆகும் போது சிவப்பு நிறம்
+                liveRow.setAttribute('color', '#ff4444'); // சிவப்பு நிறம்
             }
         }
 
