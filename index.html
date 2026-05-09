@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - 3D Multi Gate Table</title>
+    <title>IIST AR - 3D Tracked Gates</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     <style>
@@ -37,8 +37,8 @@
         
         <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
 
-        <!-- AND GATE (Target 0) -->
-        <a-entity mindar-image-target="targetIndex: 0" id="andTarget" class="logic-gate" data-gate="AND">
+        <!-- AND GATE TARGET (Index 0) -->
+        <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
             <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
                 <a-text value="AND GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
                 <a-text value="A    B  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
@@ -53,8 +53,8 @@
             </a-box>
         </a-entity>
 
-        <!-- OR GATE (Target 1) -->
-        <a-entity mindar-image-target="targetIndex: 1" id="orTarget" class="logic-gate" data-gate="OR">
+        <!-- OR GATE TARGET (Index 1) -->
+        <a-entity mindar-image-target="targetIndex: 1" id="orTarget">
             <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
                 <a-text value="OR GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
                 <a-text value="A    B  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
@@ -69,16 +69,17 @@
             </a-box>
         </a-entity>
 
-        <!-- NOT GATE (Target 2) -->
-        <a-entity mindar-image-target="targetIndex: 2" id="notTarget" class="logic-gate" data-gate="NOT">
+        <!-- NOT GATE TARGET (Index 2) -->
+        <a-entity mindar-image-target="targetIndex: 2" id="notTarget">
             <a-box position="0 0 0" width="1.1" height="1.3" depth="0.02" color="#111" opacity="0.9">
                 <a-text value="NOT GATE TRUTH TABLE" position="0 0.5 0.02" align="center" width="2" color="#00d2ff"></a-text>
-                <a-text value="INPUT (A) |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
+                <a-text value="IN (A)  |  OUT" position="0 0.3 0.02" align="center" width="2.5" color="#aaa"></a-text>
                 <a-entity line="start: -0.4 0.22 0.02; end: 0.4 0.22 0.02; color: #444"></a-entity>
-                <a-text id="notRow0" value="0        |   1" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
+                <a-text value="-" position="0 0.1 0.02" align="center" width="2.5" color="white"></a-text>
                 <a-plane id="highlightNOT" position="0 -0.05 0.01" width="0.9" height="0.12" color="#222" opacity="0.8">
-                    <a-text id="rowNOT" value="1        |   0" position="0 0 0.01" align="center" width="2.5" color="#ff4444"></a-text>
+                    <a-text id="rowNOT" value="0  |  1" position="0 0 0.01" align="center" width="2.5" color="#00ff00"></a-text>
                 </a-plane>
+                <a-text value="-" position="0 -0.2 0.02" align="center" width="2.5" color="white"></a-text>
                 <a-text value="IIST AR LAB" position="0 -0.55 0.02" align="center" width="1.2" color="#555"></a-text>
             </a-box>
         </a-entity>
@@ -87,42 +88,43 @@
 
     <script>
         let inA = 0, inB = 0, activeGate = "";
-        const ui = document.querySelector('#ui');
-        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        const ui = document.querySelector('#ui'), btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        const targets = {
+            and: document.querySelector('#andTarget'),
+            or: document.querySelector('#orTarget'),
+            not: document.querySelector('#notTarget')
+        };
 
-        // Logic Targets
-        const targets = document.querySelectorAll('.logic-gate');
-
-        targets.forEach(target => {
-            target.addEventListener("targetFound", () => {
-                activeGate = target.getAttribute('data-gate');
+        // Event Listeners for Found/Lost
+        Object.keys(targets).forEach(gate => {
+            targets[gate].addEventListener("targetFound", () => {
+                activeGate = gate;
                 ui.style.display = "block";
-                // NOT gate என்றால் B பட்டனை மறைத்துவிடு
-                btnB.style.display = (activeGate === "NOT") ? "none" : "block";
+                btnB.style.display = (gate === 'not') ? "none" : "block"; // NOT gate-க்கு B பட்டன் தேவையில்லை
                 updateLogic();
             });
-            target.addEventListener("targetLost", () => { ui.style.display = "none"; });
+            targets[gate].addEventListener("targetLost", () => { ui.style.display = "none"; });
         });
 
         function updateLogic() {
-            if (activeGate === "AND") {
+            if (activeGate === 'and') {
                 let out = (inA === 1 && inB === 1) ? 1 : 0;
-                const row = document.getElementById('rowAND'), hl = document.getElementById('highlightAND');
+                let row = document.getElementById('rowAND'), hl = document.getElementById('highlightAND');
                 row.setAttribute('value', `1    1  |   ${out}`);
                 row.setAttribute('color', out ? '#00ff00' : '#ff4444');
                 hl.setAttribute('color', out ? '#004400' : '#440000');
             } 
-            else if (activeGate === "OR") {
+            else if (activeGate === 'or') {
                 let out = (inA === 1 || inB === 1) ? 1 : 0;
-                const row = document.getElementById('rowOR'), hl = document.getElementById('highlightOR');
+                let row = document.getElementById('rowOR'), hl = document.getElementById('highlightOR');
                 row.setAttribute('value', `1    1  |   ${out}`);
                 row.setAttribute('color', out ? '#00ff00' : '#ff4444');
                 hl.setAttribute('color', out ? '#004400' : '#440000');
             }
-            else if (activeGate === "NOT") {
+            else if (activeGate === 'not') {
                 let out = (inA === 1) ? 0 : 1;
-                const row = document.getElementById('rowNOT'), hl = document.getElementById('highlightNOT');
-                row.setAttribute('value', `1        |   ${out}`);
+                let row = document.getElementById('rowNOT'), hl = document.getElementById('highlightNOT');
+                row.setAttribute('value', `${inA}  |  ${out}`);
                 row.setAttribute('color', out ? '#00ff00' : '#ff4444');
                 hl.setAttribute('color', out ? '#004400' : '#440000');
             }
