@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Simple Logic Fix</title>
+    <title>IIST AR - Truth Table Update</title>
     <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
     
@@ -52,26 +52,15 @@
 
         <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
             
-            <a-plane position="0 0 0" width="1.2" height="0.9" color="#111" opacity="0.9" material="transparent: true; side: double">
+            <a-plane position="0 0 0" width="1.2" height="1.0" color="#111" opacity="0.9" material="transparent: true; side: double">
+                <a-text value="AND GATE TRUTH TABLE" position="0 0.4 0.01" align="center" width="2" color="#00d2ff"></a-text>
                 
-                <a-text value="AND GATE TRUTH TABLE" 
-                        position="0 0.38 0.01" 
-                        align="center" 
-                        width="2" 
-                        color="#00d2ff">
-                </a-text>
+                <!-- நிலையான வரிகள் (Header + first 3 rows) -->
+                <a-text value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0" 
+                        position="0 0.12 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
 
-                <!-- OUTPUT last row la -->
-                <a-text id="tableText"
-                        value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0\n1   1  |   0"
-                        position="0 0 0.01"
-                        align="center"
-                        width="2.5"
-                        font="monoid"
-                        color="white"
-                        line-height="50">
-                </a-text>
-
+                <!-- மாறும் கடைசி வரி (Last Row) -->
+                <a-text id="lastRow" value="1   1  |   0" position="0 -0.28 0.01" align="center" width="2.5" font="monoid" color="#ff4444"></a-text>
             </a-plane>
 
         </a-entity>
@@ -79,65 +68,41 @@
 
     <script>
         let inA = 0, inB = 0;
+        const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
+        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        const lastRow = document.getElementById('lastRow');
 
-        const ui = document.querySelector('#ui');
-        const andTarget = document.querySelector('#andTarget');
-
-        const btnA = document.getElementById('btnA');
-        const btnB = document.getElementById('btnB');
-
-        const tableText = document.getElementById('tableText');
-
-        // படம் கண்டறியப்பட்டால்/மறைந்தால்
-        andTarget.addEventListener("targetFound", () => {
-            ui.style.display = "block";
-        });
-
-        andTarget.addEventListener("targetLost", () => {
-            ui.style.display = "none";
-        });
+        andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
+        andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
 
         function updateLogic() {
-
             // AND Gate Logic
             let out = (inA === 1 && inB === 1) ? 1 : 0;
 
-            // Last row மட்டும் update ஆகும்
-            let tableValue =
-`A   B  |  OUT
------------
-0   0  |   0
-0   1  |   0
-1   0  |   0
-${inA}   ${inB}  |   ${out}`;
-
-            tableText.setAttribute('value', tableValue);
-
             if (out === 1) {
-                tableText.setAttribute('color', '#00ff99');
+                // கடைசி வரி பச்சை நிறமாக மாறும்
+                lastRow.setAttribute('value', '1   1  |   1');
+                lastRow.setAttribute('color', '#00ff00');
             } else {
-                tableText.setAttribute('color', 'white');
+                // கடைசி வரி சிவப்பு நிறமாக மாறும்
+                lastRow.setAttribute('value', '1   1  |   0');
+                lastRow.setAttribute('color', '#ff4444');
             }
         }
 
         btnA.onclick = () => {
             inA = inA === 0 ? 1 : 0;
-
             btnA.innerText = `A: ${inA}`;
             btnA.className = inA ? 'btn on' : 'btn off';
-
             updateLogic();
         };
 
         btnB.onclick = () => {
             inB = inB === 0 ? 1 : 0;
-
             btnB.innerText = `B: ${inB}`;
             btnB.className = inB ? 'btn on' : 'btn off';
-
             updateLogic();
         };
     </script>
-
 </body>
 </html>
