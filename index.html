@@ -1,89 +1,163 @@
 <!DOCTYPE html>
-<html>
+<html lang="ta">
 <head>
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>IIST AR - Simple Logic Fix</title>
-    <script src="https://aframe.io/releases/1.5.0/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/mind-ar@1.2.5/dist/mindar-image-aframe.prod.js"></script>
-    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IIST - HD Logic Lab</title>
     <style>
-        body { margin: 0; overflow: hidden; position: fixed; width: 100%; height: 100%; }
-        
-        #ui { 
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); 
-            z-index: 1000; text-align: center; font-family: sans-serif; 
-            background: rgba(10, 10, 10, 0.85); padding: 20px; 
-            border-radius: 20px; color: white; display: none; 
-            border: 2px solid #00d2ff; width: 80%; max-width: 350px;
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050505;
+            color: white;
+            font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            overflow: hidden;
         }
 
-        .btn-container { display: flex; justify-content: center; gap: 15px; margin-top: 10px; }
-
-        .btn { 
-            flex: 1; padding: 15px 10px; cursor: pointer; border: none; 
-            border-radius: 12px; font-weight: bold; font-size: 14px; 
-            transition: 0.3s; text-transform: uppercase;
+        /* மெயின் கன்சோல் பாக்ஸ் */
+        .lab-container {
+            width: 90%;
+            max-width: 400px;
+            background: #111;
+            border: 2px solid #00d2ff;
+            border-radius: 20px;
+            padding: 20px;
+            box-shadow: 0 0 25px rgba(0, 210, 255, 0.2);
+            text-align: center;
         }
 
-        .off { background: #444; color: #bbb; border-bottom: 4px solid #222; }
-        .on { background: #00ff00; color: #000; box-shadow: 0 0 15px #00ff00; border-bottom: 4px solid #008800; }
-        
-        #status-label { font-size: 14px; color: #00d2ff; letter-spacing: 1px; }
+        h2 {
+            color: #00d2ff;
+            font-size: 18px;
+            margin-bottom: 20px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Truth Table Style */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 25px;
+            font-family: monospace;
+            font-size: 18px;
+        }
+
+        th {
+            color: #ffff00;
+            padding: 10px;
+            border-bottom: 1px solid #333;
+        }
+
+        td {
+            padding: 12px;
+            border-bottom: 1px solid #222;
+        }
+
+        .row-off { color: #ff5555; }
+        .row-on { color: #00ff00; font-weight: bold; }
+
+        /* Status Display */
+        #output-panel {
+            background: #1a1a1a;
+            padding: 15px;
+            border-radius: 12px;
+            margin-bottom: 25px;
+            border: 1px solid #333;
+        }
+
+        #statusText {
+            font-size: 20px;
+            font-weight: bold;
+            color: #ff4444;
+        }
+
+        /* Buttons */
+        .btn-container {
+            display: flex;
+            gap: 15px;
+        }
+
+        .btn {
+            flex: 1;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.3s;
+            text-transform: uppercase;
+        }
+
+        .off {
+            background: #333;
+            color: #888;
+            border-bottom: 4px solid #1a1a1a;
+        }
+
+        .on {
+            background: #00ff00;
+            color: #000;
+            box-shadow: 0 0 15px rgba(0, 255, 0, 0.4);
+            border-bottom: 4px solid #008800;
+        }
     </style>
 </head>
 <body>
 
-    <div id="ui">
-        <div id="status-label">IIST LOGIC CONTROL</div>
+    <div class="lab-container">
+        <h2>IIST Virtual Logic Lab</h2>
+
+        <!-- அவுட்புட் டிஸ்ப்ளே -->
+        <div id="output-panel">
+            <div id="statusText">OUTPUT: 0 (OFF)</div>
+        </div>
+
+        <!-- Truth Table -->
+        <table>
+            <thead>
+                <tr>
+                    <th>A</th>
+                    <th>B</th>
+                    <th>OUT</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr class="row-off"><td>0</td><td>0</td><td>0</td></tr>
+                <tr class="row-off"><td>0</td><td>1</td><td>0</td></tr>
+                <tr class="row-off"><td>1</td><td>0</td><td>0</td></tr>
+                <tr class="row-on"><td>1</td><td>1</td><td>1</td></tr>
+            </tbody>
+        </table>
+
+        <!-- கட்டுப்பாட்டு பட்டன்கள் -->
         <div class="btn-container">
             <button id="btnA" class="btn off">A: 0</button>
             <button id="btnB" class="btn off">B: 0</button>
         </div>
     </div>
 
-    <a-scene 
-        mindar-image="imageTargetSrc: ./targets.mind; autoStart: true; uiLoading: no; uiScanning: no;" 
-        color-space="sRGB" 
-        renderer="colorManagement: true, physicallyCorrectLights" 
-        vr-mode-ui="enabled: false" 
-        device-orientation-permission-ui="enabled: false">
-        
-        <a-camera position="0 0 0" look-controls="enabled: false"></a-camera>
-
-        <a-entity mindar-image-target="targetIndex: 0" id="andTarget">
-            
-            <a-plane position="0 0 0" width="1.2" height="0.8" color="#111" opacity="0.9" material="transparent: true; side: double">
-                <a-text value="AND GATE TRUTH TABLE" position="0 0.35 0.01" align="center" width="2" color="#00d2ff"></a-text>
-                
-                <a-text value="A   B  |  OUT\n-----------\n0   0  |   0\n0   1  |   0\n1   0  |   0\n1   1  |   1" 
-                        position="0 0 0.01" align="center" width="2.5" font="monoid" color="white" line-height="50"></a-text>
-            </a-plane>
-
-            <a-text id="statusText" value="OUTPUT: OFF" position="0 -0.5 0" scale="0.6 0.6 0.6" color="#ff4444" align="center" font="exo2bold"></a-text>
-
-        </a-entity>
-    </a-scene>
-
     <script>
         let inA = 0, inB = 0;
-        const ui = document.querySelector('#ui'), andTarget = document.querySelector('#andTarget');
-        const btnA = document.getElementById('btnA'), btnB = document.getElementById('btnB');
+        const btnA = document.getElementById('btnA');
+        const btnB = document.getElementById('btnB');
         const statusText = document.getElementById('statusText');
 
-        // படம் கண்டறியப்பட்டால்/மறைந்தால்
-        andTarget.addEventListener("targetFound", () => { ui.style.display = "block"; });
-        andTarget.addEventListener("targetLost", () => { ui.style.display = "none"; });
-
         function updateLogic() {
-            // AND Gate Logic
             let out = (inA === 1 && inB === 1) ? 1 : 0;
 
             if (out === 1) {
-                statusText.setAttribute('value', 'OUTPUT: 1 (ON)');
-                statusText.setAttribute('color', '#00ff00');
+                statusText.innerText = 'OUTPUT: 1 (ON)';
+                statusText.style.color = '#00ff00';
             } else {
-                statusText.setAttribute('value', 'OUTPUT: 0 (OFF)');
-                statusText.setAttribute('color', '#ff4444');
+                statusText.innerText = 'OUTPUT: 0 (OFF)';
+                statusText.style.color = '#ff4444';
             }
         }
 
